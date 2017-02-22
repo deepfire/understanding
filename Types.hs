@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 {-# LANGUAGE DataKinds, GADTs, KindSignatures, TypeFamilies, TypeInType, TypeOperators, UnicodeSyntax, StandaloneDeriving #-}
 
 module Understanding.Types where
@@ -7,7 +8,7 @@ import GHC.Types (Type)
 
 data T p (size ∷ Nat) where
   TZ ∷ T p 0
-  TS ∷ (Show p, CmpNat (m + 1) n ~ EQ) ⇒
+  TS ∷ (Show p, (m + 1) ~ n) ⇒
     { payload ∷ p
     , next    ∷ T a m } → T a n
 deriving instance Show p ⇒ Show (T p s)
@@ -22,6 +23,17 @@ instance MeasuredMonoid (T p) where
   mmappend     TZ      t@(TS _ _) = t
   mmappend  t@(TS _ _)    TZ      = t
   mmappend tl@(TS pl nl)  tr      = TS pl $ mmappend nl tr
+
+(<>) ∷ MeasuredMonoid a ⇒ a n → a m → a (m + n)
+(<>) = mmappend
+
+-- * Success, due to use of OPTIONS_GHC -fplugin GHC.TypeLits.Normalise
+-- > :t TZ <> TZ
+-- TZ <> TZ :: T p 0
+-- > TS 1 TZ <> TS 0 TZ
+-- TS {payload = 1, next = TS {payload = 0, next = TZ}}
+-- > :t TS 1 TZ <> TS 0 TZ
+-- TS 1 TZ <> TS 0 TZ :: T a 2
 
 -- * Failure due to lack of inductive structure of GHC.TypeLits.Nat
 --
@@ -57,7 +69,7 @@ instance MeasuredMonoid (T p) where
 --   mappend tl@(TS pl nl)  tr      = TS pl $ mappend nl tr
 
 -- * Failure due to forced type equality of regular monoid operation arguments.
--- 
+--
 -- error:
 --     • Couldn't match type ‘d’ with ‘0’
 --       ‘d’ is a rigid type variable bound by
