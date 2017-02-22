@@ -1,0 +1,33 @@
+name:                understanding
+version:             0.1.0.0
+synopsis:            Understanding Haskell.
+description:         An attempt to understand Haskell through a series of
+                     positive and negative expositions.
+license:             PublicDomain
+author:              Kosyrev Serge
+maintainer:          _deepfire@feelingofgreen.ru
+category:            Understanding
+build-type:          Simple
+extra-source-files:  ChangeLog.md
+cabal-version:       >=1.10
+
+library
+  exposed-modules:     Polymorphism, Singletons, Types
+  other-extensions:    GADTs
+                     , RankNTypes
+                     , UnicodeSyntax
+                     , DataKinds
+                     , EmptyCase
+                     , FlexibleContexts
+                     , LambdaCase
+                     , PolyKinds
+                     , TemplateHaskell
+                     , TypeFamilies
+                     , TypeOperators
+                     , KindSignatures
+                     , TypeInType
+                     , StandaloneDeriving
+  build-depends:
+                base >=4.9 && <4.10
+              , ghc-prim >=0.5 && <0.6
+  default-language:    Haskell2010
